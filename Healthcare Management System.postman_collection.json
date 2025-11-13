@@ -1,0 +1,1448 @@
+{
+	"info": {
+		"_postman_id": "552faf7e-f542-444c-b607-88cdb23603da",
+		"name": "Healthcare Management System",
+		"description": "The **Healthcare Management System** is a web-based platform designed to digitize and streamline hospital, doctor, and patient management. It centralizes patient records, appointments, prescriptions, reports, and health cards, enabling efficient healthcare delivery for doctors, patients, and administrators.\n\nThis system provides **role-based access** with distinct functionalities for **Admin, Doctor, Patient**, and optionally emergency scenarios.\n\n---\n\n### **Key Modules & Functionalities**\n\n#### 1️⃣ **Authentication Module**\n\n- Handles registration and login for **patients, doctors, and admin**.\n    \n- Includes **token verification** and **logout** functionality.\n    \n- Ensures **role-based access control** using JWT tokens.\n    \n\n**Endpoints:**\n\n- `POST /auth/patient/signup` – Register a new patient\n    \n- `POST /auth/patient/login` – Patient login\n    \n- `POST /auth/doctor/signup` – Doctor registration\n    \n- `POST /auth/doctor/login` – Doctor login\n    \n- `POST /auth/admin/login` – Admin login\n    \n- `POST /auth/logout` – Logout\n    \n- `GET /auth/verify-token` – Verify session token\n    \n\n---\n\n#### 2️⃣ **Admin Module**\n\n- **Approvals & Management**: Approve or reject doctors and patients.\n    \n- **CRUD Operations**: View, edit, and delete doctor/patient profiles.\n    \n- **Appointment Management**: View all appointments, filter by doctor or patient.\n    \n\n**Endpoints:**\n\n- Approve: `/admin/approve/doctor/:id`, `/admin/approve/patient/:id`\n    \n- CRUD: `/admin/get/doctors`, `/admin/get/patients`, `/admin/get/doctor/:id`, `/admin/get/patient/:id`\n    \n- Edit: `/admin/edit/doctor/:id`, `/admin/edit/patient/:id`\n    \n- Delete: `/admin/delete/doctor/:id`, `/admin/delete/patient/:id`\n    \n- Appointments: `/admin/appointments`, `/admin/appointments/:id`\n    \n\n---\n\n#### 3️⃣ **Doctor Module**\n\n- **Profile Management**: View and update doctor profile.\n    \n- **Patient Management**: View assigned patients.\n    \n- **Appointments**: Manage scheduled appointments and emergency availability.\n    \n- **Reports & Prescriptions**: Upload, approve reports, prescribe medicines, associate reports with prescriptions.\n    \n\n**Endpoints:**\n\n- Profile: `/doctor/profile/:id` (GET, PUT)\n    \n- Patients: `/doctor/patients`\n    \n- Appointments: `/doctor/appointments`\n    \n- Reports: `/doctor/upload-report/:patientId`, `/doctor/unapporved-reports/:patientId`, `/doctor/approve-report/:reportId`\n    \n- Prescriptions: `/doctor/prescribe/:patientId`, `/doctor/get-prescription/:patientId`\n    \n\n---\n\n#### 4️⃣ **Patient Module**\n\n- **Profile Management**: View and update profile, upload photo.\n    \n- **Medical Records**: View prescription history, current medicines, reports, and health card.\n    \n- **Appointments**: Book, cancel, reschedule appointments.\n    \n\n**Endpoints:**\n\n- Profile: `/patient/profile` (GET, PUT)\n    \n- Photo Upload: `/patient/upload-photo`\n    \n- Medical History: `/patient/medical-history`\n    \n- Health Card: `/patient/health-card`\n    \n\n---\n\n#### 5️⃣ **Appointment Module**\n\n- **Booking & Scheduling**: Patients can book appointments with approved doctors.\n    \n- **Rescheduling & Cancellation**: All roles can reschedule/cancel appointments as permitted.\n    \n- **Doctor Availability**: Ensures appointments respect doctor timings and existing bookings.\n    \n- **Emergency Appointments**: Patients can view emergency-available doctors.\n    \n\n**Endpoints:**\n\n- Book: `/appointment/book`\n    \n- Cancel: `/appointment/cancel/:appointmentId`\n    \n- Reschedule: `/appointment/reschedule/:appointmentId`\n    \n- Get Appointments: `/appointment/get/patient/:patientId`, `/appointment/get/doctor/:doctorId`\n    \n- Emergency: `/appointment/emergency`\n    \n- Get Single: `/appointment/:appointmentId`\n    \n\n---\n\n#### 6️⃣ **Prescription Module**\n\n- **Current Medicines**: View medicines still active for a patient.\n    \n- **History**: View past prescriptions.\n    \n- **Details**: View a specific prescription by ID.\n    \n\n**Endpoints:**\n\n- Current Medicines: `/prescription/current/:patientId`\n    \n- Prescription History: `/prescription/history/:patientId`\n    \n- Get Prescription: `/prescription/:prescriptionId`\n    \n\n---\n\n#### 7️⃣ **Reports Module**\n\n- **Upload & Manage Reports**: Patients and doctors can upload reports.\n    \n- **Approval Workflow**: Doctors approve or reject uploaded reports.\n    \n- **View Reports**: Users can view patient reports.\n    \n\n**Endpoints:**\n\n- Upload: `/report/upload`\n    \n- View Patient Reports: `/report/view/:patientId`\n    \n- Get Single Report: `/report/:reportId`\n    \n\n---\n\n#### 8️⃣ **Health Card Module**\n\n- **Generate Health Card**: Admin or patient can generate a digital health card.\n    \n- **Scan Health Card**: QR-based scan to retrieve patient information.\n    \n- **Update Health Card**: Admin can update health card details.\n    \n\n**Endpoints:**\n\n- Generate: `/healthcard/generate/:patientId`\n    \n- Scan: `/healthcard/scan/:qrId`\n    \n- Update: `/healthcard/update/:patientId`\n    \n\n---\n\n### **Key Features**\n\n- **Role-Based Access Control:** Ensures data security and privacy.\n    \n- **Cloud Integration:** Reports and photos stored in **Cloudinary**.\n    \n- **Pagination & Filters:** Admins can query appointments by patient or doctor with pagination.\n    \n- **Real-Time Checks:** Appointment conflicts, doctor availability, and medicine validity checks.\n    \n- **QR Code Integration:** Health card QR for quick access to patient info.\n    \n\n---\n\n### **Usage Notes for Frontend**\n\n1. **Authorization:** Every protected route requires `Authorization: Bearer` header.\n    \n2. **File Uploads:** Use `multipart/form-data` for reports and patient photos.\n    \n3. **Query Parameters:** Pagination, filters for appointments (patientId, doctorId, page, limit).\n    \n4. **Response Standard:** JSON with `status`, `data` or `message` fields for consistent frontend handling.\n    \n\nEndFragment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41542363"
+	},
+	"item": [
+		{
+			"name": "Auth Routes",
+			"item": [
+				{
+					"name": "Patient Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Ravi Sharma\",\r\n  \"email\": \"ravi1@gmail.com\",\r\n  \"password\": \"123456\",\r\n  \"aadhaar\": \"123456789014\",\r\n  \"phone\": \"9876543215\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/auth/patient/signup",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"patient",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patient Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"ravi@gmail.com\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/auth/patient/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"patient",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/auth/logout",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTEyNTQ2LCJleHAiOjE3NjM1MTczNDZ9.wpIgFT0VI1MghA8HKr2AR25YTWUHZzGz1PaXMAzHUaU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/auth/verify-token",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"verify-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Doctor Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"drpooja@gmail.com\",\r\n    \"password\":\"pooja123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/auth/doctor/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"doctor",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin@example.com\",\r\n  \"password\": \"adminpassword\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/auth/admin/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"admin",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Doctor Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Dr. Pooja Mehta\",\r\n  \"email\": \"drpooja@gmail.com\",\r\n  \"password\": \"pooja123\",\r\n  \"specialization\": \"Dermatologist\",\r\n  \"timings\": \"11 AM - 4 PM\",\r\n  \"day\": [\"Monday\", \"Wednesday\", \"Friday\"],\r\n  \"emergencyAvailable\": false,\r\n  \"phone\": \"9988776655\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/auth/doctor/signup",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"auth",
+								"doctor",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/auth` (assuming mounted as `/auth` in your server)\n\n---\n\n#### 1️⃣ **Patient Signup**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/patient/signup`\n    \n- **Purpose:** Register a new patient.\n    \n- **Body (JSON):**\n    \n\n```\n{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"aadhaar\": \"123456789012\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}\n\n ```\n\n- **Response (201):**\n    \n\n```\n{\n  \"message\": \"Patient registered successfully\",\n  \"patient\": {\n    \"_id\": \"patientId\",\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"aadhaar\": \"123456789012\",\n    \"isApproved\": false\n  }\n}\n\n ```\n\n---\n\n#### 2️⃣ **Patient Login**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/patient/login`\n    \n- **Purpose:** Login a patient and receive JWT token.\n    \n- **Body (JSON):**\n    \n\n```\n{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"message\": \"Login successful\",\n  \"token\": \"jwt_token\",\n  \"user\": {\n    \"id\": \"patientId\",\n    \"role\": \"patient\"\n  }\n}\n\n ```\n\n---\n\n#### 3️⃣ **Doctor Signup**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/doctor/signup`\n    \n- **Purpose:** Register a new doctor.\n    \n- **Body (JSON):**\n    \n\n```\n{\n  \"name\": \"Dr. Pooja Mehta\",\n  \"email\": \"drpooja@gmail.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9988776655\",\n  \"specialization\": \"Dermatologist\",\n  \"timings\": \"11 AM - 4 PM\",\n  \"day\": [\"monday\", \"wednesday\", \"friday\"]\n}\n\n ```\n\n- **Response (201):**\n    \n\n```\n{\n  \"message\": \"Doctor registered successfully\",\n  \"doctor\": {\n    \"_id\": \"doctorId\",\n    \"name\": \"Dr. Pooja Mehta\",\n    \"specialization\": \"Dermatologist\",\n    \"approved\": false\n  }\n}\n\n ```\n\n---\n\n#### 4️⃣ **Doctor Login**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/doctor/login`\n    \n- **Purpose:** Login a doctor and receive JWT token.\n    \n- **Body (JSON):**\n    \n\n```\n{\n  \"email\": \"drpooja@gmail.com\",\n  \"password\": \"password123\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"message\": \"Login successful\",\n  \"token\": \"jwt_token\",\n  \"user\": {\n    \"id\": \"doctorId\",\n    \"role\": \"doctor\"\n  }\n}\n\n ```\n\n---\n\n#### 5️⃣ **Admin Login**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/admin/login`\n    \n- **Purpose:** Login as admin and receive JWT token.\n    \n- **Body (JSON):**\n    \n\n```\n{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminpassword\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"message\": \"Login successful\",\n  \"token\": \"jwt_token\",\n  \"user\": {\n    \"id\": \"adminId\",\n    \"role\": \"admin\"\n  }\n}\n\n ```\n\n---\n\n#### 6️⃣ **Logout**\n\n- **Method:** `POST`\n    \n- **URL:** `/auth/logout`\n    \n- **Purpose:** Logout the current user.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"message\": \"Logged out successfully\"\n}\n\n ```\n\n---\n\n#### 7️⃣ **Verify Token**\n\n- **Method:** `GET`\n    \n- **URL:** `/auth/verify-token`\n    \n- **Purpose:** Verify if JWT token is valid.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"valid\": true,\n  \"user\": {\n    \"id\": \"userId\",\n    \"role\": \"patient/doctor/admin\"\n  }\n}\n\n ```\n\n---\n\n✅ **Frontend Use:**\n\n- Use signup/login routes to handle registration and authentication.\n    \n- `Authorization` header is needed for protected routes (`logout` and `verify-token`).\n    \n\nEndFragment"
+		},
+		{
+			"name": "Admin Routes",
+			"item": [
+				{
+					"name": "Approve Doctor",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"approve\": \"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/admin/approve/doctor/6914d52b468189899d487c44",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"approve",
+								"doctor",
+								"6914d52b468189899d487c44"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Patient",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxMTUyMywiZXhwIjoxNzYzNTE2MzIzfQ.lZZnc0RXLx6Yac-hsxVMs4T1tRd7Jdk2_ZhXOjwPpKI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"approve\":\"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/admin/approve/patient/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"approve",
+								"patient",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/get/doctors",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"get",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/get/patients",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"get",
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/get/doctor/6913f3848767303d9e7e9e71",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"get",
+								"doctor",
+								"6913f3848767303d9e7e9e71"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNDUxMCwiZXhwIjoxNzYzNTE5MzEwfQ.Dkh5pcbX45b8Bt8nL5aeWiwzfaNqspQ_-pJdFYDiKVg",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/get/patient/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"get",
+								"patient",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"timings\":\"10 AM - 5 PM\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/admin/edit/doctor/6913f3848767303d9e7e9e71",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"edit",
+								"doctor",
+								"6913f3848767303d9e7e9e71"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Ravi Yadav\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/admin/edit/patient/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"edit",
+								"patient",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/delete/patient/6913fa57f7c3ef123228d3ea",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"delete",
+								"patient",
+								"6913fa57f7c3ef123228d3ea"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Doctor",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/delete/doctor/6913fc2bf7c3ef123228d3f3",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"delete",
+								"doctor",
+								"6913fc2bf7c3ef123228d3f3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get  Appointments By Admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2Mjk4NjQwOCwiZXhwIjoxNzYzNTkxMjA4fQ.TrmCGwY0-I2a8lLm82dvRdB7Y43IkcDgoD_KsBmXMGs",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/appointments",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User  Appointment By Admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2Mjk4NjQwOCwiZXhwIjoxNzYzNTkxMjA4fQ.TrmCGwY0-I2a8lLm82dvRdB7Y43IkcDgoD_KsBmXMGs",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/admin/appointments?patientId=6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"admin",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "patientId",
+									"value": "6913e2a53175f209fd1ab6b5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/admin` (assuming this is mounted as `/admin` in your main server)\n\n#### 1️⃣ `PATCH /approve/doctor/:id`\n\n- **Purpose:** Approve or reject a doctor registration.\n    \n- **Params:** `id` – Doctor's ObjectId.\n    \n- **Body:** `{ approve: true/false }`\n    \n- **Response:** Updated doctor object with `approved` status.\n    \n- **Frontend Use:** Approve/reject doctors from admin dashboard.\n    \n\n#### 2️⃣ `PATCH /approve/patient/:id`\n\n- **Purpose:** Approve or reject a patient registration.\n    \n- **Params:** `id` – Patient's ObjectId.\n    \n- **Body:** `{ approve: true/false }`\n    \n- **Response:** Updated patient object with `isApproved` status.\n    \n- **Frontend Use:** Approve/reject patients from admin dashboard.\n    \n\n#### 3️⃣ `GET /get/doctors`\n\n- **Purpose:** Fetch all doctors.\n    \n- **Query Params (optional):** Pagination (`page`, `limit`).\n    \n- **Response:** Array of doctor objects.\n    \n- **Frontend Use:** List all doctors in admin panel with pagination.\n    \n\n#### 4️⃣ `GET /get/patients`\n\n- **Purpose:** Fetch all patients.\n    \n- **Query Params (optional):** Pagination (`page`, `limit`).\n    \n- **Response:** Array of patient objects.\n    \n- **Frontend Use:** List all patients in admin panel with pagination.\n    \n\n#### 5️⃣ `GET /get/doctor/:id`\n\n- **Purpose:** Fetch a single doctor by ID.\n    \n- **Params:** `id` – Doctor's ObjectId.\n    \n- **Response:** Doctor object with full details.\n    \n- **Frontend Use:** Show detailed doctor info or edit form.\n    \n\n#### 6️⃣ `GET /get/patient/:id`\n\n- **Purpose:** Fetch a single patient by ID.\n    \n- **Params:** `id` – Patient's ObjectId.\n    \n- **Response:** Patient object with full details.\n    \n- **Frontend Use:** Show detailed patient info or edit form.\n    \n\n#### 7️⃣ `PUT /edit/doctor/:id`\n\n- **Purpose:** Update a doctor's details.\n    \n- **Params:** `id` – Doctor's ObjectId.\n    \n- **Body:** Fields to update (e.g., `name`, `specialization`, `phone`, etc.)\n    \n- **Behavior:** Any update will automatically set `approved = false`.\n    \n- **Response:** Updated doctor object.\n    \n- **Frontend Use:** Admin can edit doctor details in form.\n    \n\n#### 8️⃣ `PUT /edit/patient/:id`\n\n- **Purpose:** Update a patient's details.\n    \n- **Params:** `id` – Patient's ObjectId.\n    \n- **Body:** Fields to update (e.g., `name`, `aadhaar`, `email`, etc.)\n    \n- **Behavior:** Any update will automatically set `isApproved = false`.\n    \n- **Response:** Updated patient object.\n    \n- **Frontend Use:** Admin can edit patient details in form.\n    \n\n#### 9️⃣ `DELETE /delete/doctor/:id`\n\n- **Purpose:** Delete a doctor permanently.\n    \n- **Params:** `id` – Doctor's ObjectId.\n    \n- **Response:** Success message or deleted doctor info.\n    \n- **Frontend Use:** Remove doctor from the system.\n    \n\n#### 🔟 `DELETE /delete/patient/:id`\n\n- **Purpose:** Delete a patient permanently.\n    \n- **Params:** `id` – Patient's ObjectId.\n    \n- **Response:** Success message or deleted patient info.\n    \n- **Frontend Use:** Remove patient from the system.\n    \n\n#### 1️⃣1️⃣ `GET /appointments`\n\n- **Purpose:** Get **all appointments** (admin view).\n    \n- **Query Params (optional):** `page`, `limit`, `patientId`, `doctorId`\n    \n- **Response:** Paginated list of appointments with patient and doctor info.\n    \n- **Frontend Use:** Display all appointments, optionally filtered by patient or doctor.\n    \n\n#### 1️⃣2️⃣ `GET /appointments/:id`\n\n- **Purpose:** Get **appointments of a specific user** (patient or doctor).\n    \n- **Params:** `id` – Patient or Doctor ObjectId.\n    \n- **Response:** Array of appointments for that user.\n    \n- **Frontend Use:** Show all appointments for a particular user in admin panel.\n    \n\nEndFragment"
+		},
+		{
+			"name": "HealthCard Routes",
+			"item": [
+				{
+					"name": "Generate HealthCard",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/healthcard/generate/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"healthcard",
+								"generate",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Scan Qr Healthcard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MjkxNjE5OSwiZXhwIjoxNzYzNTIwOTk5fQ.ff71-v2U8BXej7d-lMGw37KyxMs5bmtwjNRBS6TNL3U",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/healthcard/scan/89e95c15-3be1-412e-84d1-4e93bfe40375",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"healthcard",
+								"scan",
+								"89e95c15-3be1-412e-84d1-4e93bfe40375"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update HealthCard",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTJiZjNjODk4ZjdjYjc3NmFkOWJhMCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2Mjk5MDQ0MiwiZXhwIjoxNzYzNTk1MjQyfQ.BVectRXbJujyvI7g3Ph1Fj87kRuSui0QtFbnrhVA39M",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"aadhaar\":\"123456789010\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/healthcard/update/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"healthcard",
+								"update",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\nStartFragment\n\n**Base URL:** `/healthcard` (assuming mounted as `/healthcard` in your server)\n\n---\n\n#### 1️⃣ **Generate Health Card**\n\n- **Method:** `POST`\n    \n- **URL:** `/healthcard/generate/:patientId`\n    \n- **Purpose:** Generate a new health card for a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `patientId`: ID of the patient for whom the health card is being generated\n        \n- **Body (optional, JSON):** Can include additional info if your controller allows\n    \n- **Response (201):**\n    \n\nPlain Text\n\n```\n{  \"_id\": \"healthCardId\",  \"patientId\": \"patientId\",  \"qrId\": \"uniqueQRcode\",  \"issuedDate\": \"2025-11-13T05:00:00.000Z\",  \"expiryDate\": \"2026-11-12T05:00:00.000Z\"}\n\n ```\n\n---\n\n#### 2️⃣ **Scan Health Card (QR)**\n\n- **Method:** `GET`\n    \n- **URL:** `/healthcard/scan/:qrId`\n    \n- **Purpose:** Scan a health card QR to fetch patient info.\n    \n- **Params:**\n    \n    - `qrId`: QR code ID of the health card\n        \n- **Response (200):**\n    \n\nPlain Text\n\n```\n{  \"_id\": \"healthCardId\",  \"patientId\": \"patientId\",  \"name\": \"Ravi Kumar Yadav\",  \"aadhaar\": \"123456789012\",  \"issuedDate\": \"2025-11-13T05:00:00.000Z\",  \"expiryDate\": \"2026-11-12T05:00:00.000Z\"}\n\n ```\n\n---\n\n#### 3️⃣ **Update Health Card**\n\n- **Method:** `PATCH`\n    \n- **URL:** `/healthcard/update/:patientId`\n    \n- **Purpose:** Update health card info (admin only).\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `patientId`: ID of the patient whose health card is being updated\n        \n- **Body (JSON):**\n    \n\nPlain Text\n\n```\n{  \"expiryDate\": \"2027-11-12\",  \"otherField\": \"value\"}\n\n ```\n\n- **Response (200):**\n    \n\nPlain Text\n\n```\n{  \"_id\": \"healthCardId\",  \"patientId\": \"patientId\",  \"qrId\": \"uniqueQRcode\",  \"issuedDate\": \"2025-11-13T05:00:00.000Z\",  \"expiryDate\": \"2027-11-12T05:00:00.000Z\"}\n\n ```\n\nEndFragment\n\nEndFragment"
+		},
+		{
+			"name": "Appointment Routes",
+			"item": [
+				{
+					"name": "Book Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"patientId\": \"6913e2a53175f209fd1ab6b5\",\r\n  \"doctorId\": \"6914d52b468189899d487c44\",\r\n  \"date\": \"2025-11-19\",\r\n  \"time\": \"15:30\",\r\n  \"notes\": \"Follow-up consultation for test results\",\r\n  \"nextAppointment\": \"2025-12-20\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/appointment/book",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"book"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Appointment By Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/appointment/cancel/6914d9ae97c50cf66d2cd3b4",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"cancel",
+								"6914d9ae97c50cf66d2cd3b4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Appointment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/appointment/get/patient/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"get",
+								"patient",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reschedule Appointment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-11-19T15:30:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/appointment/reschedule/6914d97097c50cf66d2cd3a4",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"reschedule",
+								"6914d97097c50cf66d2cd3a4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor Appointment",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/appointment/get/doctor/6914d52b468189899d487c44",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"get",
+								"doctor",
+								"6914d52b468189899d487c44"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Emergency Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/appointment/emergency",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"emergency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Appointment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTcxNjg0LCJleHAiOjE3NjM1NzY0ODR9.KjFC5cJYAlHsj5XU24P0O01Sa-gongZGwuaMUtWziD8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/appointment/6914e48ea69bd8d255fac432",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"appointment",
+								"6914e48ea69bd8d255fac432"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/appointments` (assuming mounted as `/appointments` in your server)\n\n---\n\n#### 1️⃣ **Book Appointment**\n\n- **Method:** `POST`\n    \n- **URL:** `/appointments/book`\n    \n- **Purpose:** Patient books an appointment with a doctor.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):**\n    \n\n```\n{\n  \"patientId\": \"patientObjectId\",\n  \"doctorId\": \"doctorObjectId\",\n  \"date\": \"2025-11-19T15:30:00.000Z\",\n  \"notes\": \"Follow-up consultation\",\n  \"nextAppointment\": \"2025-12-20T00:00:00.000Z\"\n}\n\n ```\n\n- **Response (201):**\n    \n\n```\n{\n  \"message\": \"Appointment booked successfully\",\n  \"appointment\": {\n    \"_id\": \"appointmentId\",\n    \"patientId\": \"patientObjectId\",\n    \"doctorId\": \"doctorObjectId\",\n    \"date\": \"2025-11-19T15:30:00.000Z\",\n    \"time\": \"15:30\",\n    \"day\": \"tuesday\",\n    \"notes\": \"Follow-up consultation\",\n    \"nextAppointment\": \"2025-12-20T00:00:00.000Z\",\n    \"status\": \"Booked\"\n  }\n}\n\n ```\n\n---\n\n#### 2️⃣ **Cancel Appointment**\n\n- **Method:** `DELETE`\n    \n- **URL:** `/appointments/cancel/:appointmentId`\n    \n- **Purpose:** Cancel an existing appointment. Can be done by patient, doctor, or admin.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"message\": \"Appointment cancelled successfully\",\n  \"appointment\": { ...updatedAppointmentObject }\n}\n\n ```\n\n---\n\n#### 3️⃣ **Reschedule Appointment**\n\n- **Method:** `PATCH`\n    \n- **URL:** `/appointments/reschedule/:appointmentId`\n    \n- **Purpose:** Reschedule an existing appointment. Can be done by patient, doctor, or admin.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):**\n    \n\n```\n{\n  \"date\": \"2025-11-21T14:00:00.000Z\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"appointmentId\",\n  \"date\": \"2025-11-21T14:00:00.000Z\",\n  \"time\": \"14:00\",\n  \"day\": \"thursday\",\n  \"status\": \"Booked\"\n}\n\n ```\n\n---\n\n#### 4️⃣ **Get Patient Appointments**\n\n- **Method:** `GET`\n    \n- **URL:** `/appointments/get/patient/:patientId`\n    \n- **Purpose:** Fetch all appointments of a specific patient. Accessible by patient, doctor, or admin.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  { ...appointmentObject1 },\n  { ...appointmentObject2 }\n]\n\n ```\n\n---\n\n#### 5️⃣ **Get Doctor Appointments**\n\n- **Method:** `GET`\n    \n- **URL:** `/appointments/get/doctor/:doctorId`\n    \n- **Purpose:** Fetch all appointments of a specific doctor. Accessible by doctor or admin.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  { ...appointmentObject1 },\n  { ...appointmentObject2 }\n]\n\n ```\n\n---\n\n#### 6️⃣ **Get Emergency Doctors**\n\n- **Method:** `GET`\n    \n- **URL:** `/appointments/emergency`\n    \n- **Purpose:** Get doctors available for emergency consultations. Public route (no auth required).\n    \n- **Response (200):**\n    \n\n```\n[\n  { \"_id\": \"doctorId\", \"name\": \"Dr. ABC\", \"specialization\": \"Cardiologist\", \"timings\": \"24/7\", \"day\": [\"monday\",\"tuesday\",...]} \n]\n\n ```\n\n---\n\n#### 7️⃣ **Get Appointment By ID**\n\n- **Method:** `GET`\n    \n- **URL:** `/appointments/:appointmentId`\n    \n- **Purpose:** Fetch details of a single appointment. Accessible by patient, doctor, or admin.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"appointmentId\",\n  \"patientId\": { \"_id\": \"patientId\", \"name\": \"John Doe\" },\n  \"doctorId\": { \"_id\": \"doctorId\", \"name\": \"Dr. ABC\" },\n  \"date\": \"2025-11-19T15:30:00.000Z\",\n  \"time\": \"15:30\",\n  \"day\": \"tuesday\",\n  \"notes\": \"Follow-up consultation\",\n  \"status\": \"Booked\"\n}\n\n ```\n\n---\n\n✅ **Frontend Use:**\n\n- These descriptions allow your frontend to build booking forms, appointment listings, reschedule/cancel buttons, and emergency doctor lists.\n    \n- `Authorization` headers are needed wherever `auth` middleware is used.\n    \n\nEndFragment"
+		},
+		{
+			"name": "Doctor Routes",
+			"item": [
+				{
+					"name": "Get Doctor Profile By Doctor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/doctor/profile/6914d52b468189899d487c44",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"profile",
+								"6914d52b468189899d487c44"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Doctor Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"timings\":\"11 AM - 3 PM\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/doctor/profile/6914d52b468189899d487c44",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"profile",
+								"6914d52b468189899d487c44"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/doctor/patients",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Appointment By Doctor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/doctor/appointments",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Report  By Doctor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5Nzc0MTAsImV4cCI6MTc2MzU4MjIxMH0.Oh7QKhNT4OiXvfWd_g36eaUmNUrYu0UO4GlswyVBEWI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "report",
+									"description": "patient p7 report",
+									"type": "file",
+									"src": "postman-cloud:///1f080507-88d7-41c0-a0b0-8ed56729d110"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/doctor/upload-report/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"upload-report",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Report",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5ODMzMDIsImV4cCI6MTc2MzU4ODEwMn0.aKCjfH5Ra-y8x0Zgl5SFWCHIC9PBGqOmg1-XxxgFqB4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"approve\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/doctor/approve-report/691506858258aef73c136132",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"approve-report",
+								"691506858258aef73c136132"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unapproved Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/doctor/unapporved-reports/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"unapporved-reports",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Prescribe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5ODMzMDIsImV4cCI6MTc2MzU4ODEwMn0.aKCjfH5Ra-y8x0Zgl5SFWCHIC9PBGqOmg1-XxxgFqB4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"diseaseDescription\": \"Seasonal Flu with mild fever\",\r\n  \"dateOfPrescription\": \"2025-11-13T10:30:00\",\r\n  \"reportAssociated\": [\"REPORT_ID_1\", \"REPORT_ID_2\"],\r\n  \"medicines\": [\r\n    {\r\n      \"name\": \"Paracetamol\",\r\n      \"dosage\": \"500mg\",\r\n      \"timing\": \"Twice a day\",\r\n      \"durationInDays\": 5,\r\n      \"startDate\": \"2025-11-13\"\r\n    },\r\n    {\r\n      \"name\": \"Cough Syrup\",\r\n      \"dosage\": \"10ml\",\r\n      \"timing\": \"Three times a day\",\r\n      \"durationInDays\": 7,\r\n      \"startDate\": \"2025-11-13\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/doctor/prescribe/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"prescribe",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prescription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTRkNTJiNDY4MTg5ODk5ZDQ4N2M0NCIsInJvbGUiOiJkb2N0b3IiLCJpYXQiOjE3NjI5ODMzMDIsImV4cCI6MTc2MzU4ODEwMn0.aKCjfH5Ra-y8x0Zgl5SFWCHIC9PBGqOmg1-XxxgFqB4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/doctor/get-prescription/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"doctor",
+								"get-prescription",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/doctor` (assuming mounted as `/doctor` in your server)\n\n---\n\n#### 1️⃣ **Get Doctor Profile**\n\n- **Method:** `GET`\n    \n- **URL:** `/doctor/profile/:id`\n    \n- **Purpose:** Get doctor details by ID.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"doctorId\",\n  \"name\": \"Dr. Pooja Mehta\",\n  \"email\": \"drpooja@gmail.com\",\n  \"specialization\": \"Dermatologist\",\n  \"timings\": \"11 AM - 4 PM\",\n  \"day\": [\"monday\", \"wednesday\", \"friday\"],\n  \"approved\": true\n}\n\n ```\n\n---\n\n#### 2️⃣ **Update Doctor Profile**\n\n- **Method:** `PUT`\n    \n- **URL:** `/doctor/profile/:id`\n    \n- **Purpose:** Update doctor profile details. Any update sets `isApproved=false`.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):** (example)\n    \n\n```\n{\n  \"phone\": \"9876543210\",\n  \"timings\": \"10 AM - 5 PM\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"doctorId\",\n  \"name\": \"Dr. Pooja Mehta\",\n  \"timings\": \"10 AM - 5 PM\",\n  \"approved\": false\n}\n\n ```\n\n---\n\n#### 3️⃣ **Get Patients of Doctor**\n\n- **Method:** `GET`\n    \n- **URL:** `/doctor/patients`\n    \n- **Purpose:** List all patients assigned or consulted by the doctor.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"_id\": \"patientId\",\n    \"name\": \"Ravi Kumar Yadav\",\n    \"aadhaar\": \"123456789012\",\n    \"email\": \"ravi@gmail.com\",\n    \"isApproved\": true\n  }\n]\n\n ```\n\n---\n\n#### 4️⃣ **Get Doctor Appointments**\n\n- **Method:** `GET`\n    \n- **URL:** `/doctor/appointments`\n    \n- **Purpose:** List all appointments for the logged-in doctor.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"_id\": \"appointmentId\",\n    \"patientId\": { \"_id\": \"patientId\", \"name\": \"Ravi Kumar Yadav\" },\n    \"date\": \"2025-11-19T15:30:00.000Z\",\n    \"time\": \"15:30\",\n    \"status\": \"Booked\"\n  }\n]\n\n ```\n\n---\n\n#### 5️⃣ **Upload Report for a Patient**\n\n- **Method:** `POST`\n    \n- **URL:** `/doctor/upload-report/:patientId`\n    \n- **Purpose:** Upload a medical report for a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (form-data):**\n    \n    - Key: `report` (type: File)\n        \n- **Response (201):**\n    \n\n```\n{\n  \"_id\": \"reportId\",\n  \"patientId\": \"patientId\",\n  \"doctorId\": \"doctorId\",\n  \"url\": \"cloudinary_url\",\n  \"status\": \"Pending\",\n  \"date\": \"2025-11-13T10:00:00.000Z\"\n}\n\n ```\n\n---\n\n#### 6️⃣ **Get Unapproved Reports**\n\n- **Method:** `GET`\n    \n- **URL:** `/doctor/unapporved-reports/:patientId`\n    \n- **Purpose:** Fetch pending reports for a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"_id\": \"reportId\",\n    \"url\": \"cloudinary_url\",\n    \"status\": \"Pending\",\n    \"date\": \"2025-11-13T10:00:00.000Z\"\n  }\n]\n\n ```\n\n---\n\n#### 7️⃣ **Prescribe Medicines**\n\n- **Method:** `POST`\n    \n- **URL:** `/doctor/prescribe/:patientId`\n    \n- **Purpose:** Add a prescription for a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):**\n    \n\n```\n{\n  \"diseaseDescription\": \"Seasonal Flu\",\n  \"medicines\": [\n    { \"name\": \"Paracetamol\", \"dosage\": \"500mg\", \"timing\": \"Twice a day\", \"durationInDays\": 5, \"startDate\": \"2025-11-13\" }\n  ],\n  \"reportAssociated\": [\"reportId1\"],\n  \"dateOfPrescription\": \"2025-11-13\"\n}\n\n ```\n\n- **Response (201):**\n    \n\n```\n{\n  \"_id\": \"prescriptionId\",\n  \"patientId\": \"patientId\",\n  \"doctorId\": \"doctorId\",\n  \"diseaseDescription\": \"Seasonal Flu\",\n  \"medicines\": [...],\n  \"reportAssociated\": [\"reportId1\"],\n  \"dateOfPrescription\": \"2025-11-13T05:00:00.000Z\"\n}\n\n ```\n\n---\n\n#### 8️⃣ **Approve or Reject Report**\n\n- **Method:** `PATCH`\n    \n- **URL:** `/doctor/approve-report/:reportId`\n    \n- **Purpose:** Approve or reject a report.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):**\n    \n\n```\n{\n  \"approve\": true\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"reportId\",\n  \"status\": \"Approved\"\n}\n\n ```\n\n---\n\n#### 9️⃣ **Get Patient Prescriptions**\n\n- **Method:** `GET`\n    \n- **URL:** `/doctor/get-prescription/:patientId`\n    \n- **Purpose:** Fetch all prescriptions for a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"_id\": \"prescriptionId\",\n    \"diseaseDescription\": \"Seasonal Flu\",\n    \"medicines\": [...],\n    \"dateOfPrescription\": \"2025-11-13T05:00:00.000Z\"\n  }\n]\n\n ```\n\nEndFragment"
+		},
+		{
+			"name": "Patient Routes",
+			"item": [
+				{
+					"name": "Get Patient Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/patient/profile",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"patient",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Ravi Kumar Yadav\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/patient/profile",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"patient",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Photo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "photo",
+									"description": "profile photo",
+									"type": "file",
+									"src": "postman-cloud:///1f080507-88d7-41c0-a0b0-8ed56729d110"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/patient/upload-photo",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"patient",
+								"upload-photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medical History By Patient",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/patient/medical-history",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"patient",
+								"medical-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Health Card",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/patient/health-card",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"patient",
+								"health-card"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/patient` (assuming mounted as `/patient` in your server)\n\n---\n\n#### 1️⃣ **Get Patient Profile**\n\n- **Method:** `GET`\n    \n- **URL:** `/patient/profile`\n    \n- **Purpose:** Fetch logged-in patient’s profile.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"patientId\",\n  \"name\": \"Ravi Kumar Yadav\",\n  \"email\": \"ravi@gmail.com\",\n  \"aadhaar\": \"123456789012\",\n  \"isApproved\": true,\n  \"profilePhoto\": \"https://res.cloudinary.com/.../patients/photo.png\",\n  \"prescriptions\": [ ... ],\n  \"reportHistory\": [ ... ]\n}\n\n ```\n\n---\n\n#### 2️⃣ **Update Patient Profile**\n\n- **Method:** `PUT`\n    \n- **URL:** `/patient/profile`\n    \n- **Purpose:** Update logged-in patient’s profile info.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (JSON):** Any fields to update, e.g.\n    \n\n```\n{\n  \"name\": \"Ravi K. Yadav\",\n  \"email\": \"ravi_new@gmail.com\"\n}\n\n ```\n\n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"patientId\",\n  \"name\": \"Ravi K. Yadav\",\n  \"email\": \"ravi_new@gmail.com\",\n  \"aadhaar\": \"123456789012\",\n  \"isApproved\": true\n}\n\n ```\n\n---\n\n#### 3️⃣ **Upload Profile Photo**\n\n- **Method:** `POST`\n    \n- **URL:** `/patient/upload-photo`\n    \n- **Purpose:** Upload or update patient profile photo.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Body (form-data):**\n    \n    - Key: `photo` (File)\n        \n- **Response (201):**\n    \n\n```\n{\n  \"message\": \"Uploaded\",\n  \"url\": \"https://res.cloudinary.com/.../patients/photo.png\",\n  \"patient\": { ...updated patient object... }\n}\n\n ```\n\n---\n\n#### 4️⃣ **Get Medical History**\n\n- **Method:** `GET`\n    \n- **URL:** `/patient/medical-history`\n    \n- **Purpose:** Fetch prescriptions and report history for logged-in patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"patientId\",\n  \"prescriptions\": [ ... ],\n  \"reportHistory\": [ ... ]\n}\n\n ```\n\n---\n\n#### 5️⃣ **Get Health Card**\n\n- **Method:** `GET`\n    \n- **URL:** `/patient/health-card`\n    \n- **Purpose:** Fetch logged-in patient’s health card details.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"healthCardId\",\n  \"qrId\": \"uniqueQRcode\",\n  \"patientId\": \"patientId\",\n  \"issuedDate\": \"2025-11-13T05:00:00.000Z\",\n  \"expiryDate\": \"2026-11-12T05:00:00.000Z\"\n}\n\n ```\n\nEndFragment"
+		},
+		{
+			"name": "Report Routes",
+			"item": [
+				{
+					"name": "Upload Report By Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "report",
+									"description": "patient report",
+									"type": "file",
+									"src": "postman-cloud:///1f080507-88d7-41c0-a0b0-8ed56729d110"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/reports/upload",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"reports",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/reports/view/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"reports",
+								"view",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/reports/691512e81066941ca0d8c36e",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"reports",
+								"691512e81066941ca0d8c36e"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/report` (assuming mounted as `/report` in your server)\n\n---\n\n#### 1️⃣ **Upload Report**\n\n- **Method:** `POST`\n    \n- **URL:** `/report/upload`\n    \n- **Purpose:** Allow a patient to upload a medical report.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n    - `Content-Type: multipart/form-data`\n        \n- **Body (form-data):**\n    \n    - `report` – File (the report to upload)\n        \n- **Response (201):**\n    \n\n```\n{\n  \"_id\": \"reportId\",\n  \"patientId\": \"patientId\",\n  \"doctorId\": \"doctorId\",\n  \"url\": \"https://res.cloudinary.com/.../report.png\",\n  \"publicId\": \"reports/report.png\",\n  \"date\": \"2025-11-13T05:00:00.000Z\",\n  \"status\": \"Pending\",\n  \"createdAt\": \"2025-11-13T05:05:00.000Z\",\n  \"updatedAt\": \"2025-11-13T05:05:00.000Z\"\n}\n\n ```\n\n---\n\n#### 2️⃣ **View Reports by Patient**\n\n- **Method:** `GET`\n    \n- **URL:** `/report/view/:patientId`\n    \n- **Purpose:** Fetch all reports of a specific patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `patientId` – ID of the patient\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"_id\": \"reportId1\",\n    \"patientId\": \"patientId\",\n    \"doctorId\": \"doctorId\",\n    \"url\": \"https://res.cloudinary.com/.../report1.png\",\n    \"status\": \"Approved\",\n    \"date\": \"2025-11-12T21:43:00.000Z\"\n  },\n  {\n    \"_id\": \"reportId2\",\n    \"patientId\": \"patientId\",\n    \"doctorId\": \"doctorId\",\n    \"url\": \"https://res.cloudinary.com/.../report2.png\",\n    \"status\": \"Pending\",\n    \"date\": \"2025-11-13T05:00:00.000Z\"\n  }\n]\n\n ```\n\n---\n\n#### 3️⃣ **Get Single Report by ID**\n\n- **Method:** `GET`\n    \n- **URL:** `/report/:reportId`\n    \n- **Purpose:** Fetch a single report by its ID.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `reportId` – ID of the report\n        \n- **Response (200):**\n    \n\n```\n{\n  \"_id\": \"reportId\",\n  \"patientId\": \"patientId\",\n  \"doctorId\": \"doctorId\",\n  \"url\": \"https://res.cloudinary.com/.../report.png\",\n  \"publicId\": \"reports/report.png\",\n  \"date\": \"2025-11-13T05:00:00.000Z\",\n  \"status\": \"Pending\",\n  \"createdAt\": \"2025-11-13T05:05:00.000Z\",\n  \"updatedAt\": \"2025-11-13T05:05:00.000Z\"\n}\n\n ```\n\nEndFragment"
+		},
+		{
+			"name": "Prescription Routes",
+			"item": [
+				{
+					"name": "Current Medicine of Patient",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/prescription/current/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"prescription",
+								"current",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "History of Patient",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/prescription/history/6913e2a53175f209fd1ab6b5",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"prescription",
+								"history",
+								"6913e2a53175f209fd1ab6b5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prescription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTNlMmE1MzE3NWYyMDlmZDFhYjZiNSIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzYyOTgzMjQ4LCJleHAiOjE3NjM1ODgwNDh9.vBmDQhl4ifKQdboSqa63lH3lgn64iyx68d4-p1LvCr8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api}}/prescription/1d77da2c-8f10-438a-bca3-737b35b73945",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"prescription",
+								"1d77da2c-8f10-438a-bca3-737b35b73945"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "StartFragment\n\n**Base URL:** `/prescription` (assuming mounted as `/prescription` in your server)\n\n---\n\n#### 1️⃣ **Get Current Medicines**\n\n- **Method:** `GET`\n    \n- **URL:** `/prescription/current/:patientId`\n    \n- **Purpose:** Fetch all active medicines for a patient (i.e., medicines that haven’t completed their course).\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `patientId` – ID of the patient\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"prescriptionId\": \"uuid-of-prescription\",\n    \"medicine\": {\n      \"name\": \"Paracetamol\",\n      \"dosage\": \"500mg\",\n      \"timing\": \"Twice a day\",\n      \"durationInDays\": 5,\n      \"startDate\": \"2025-11-13T00:00:00.000Z\"\n    },\n    \"prescriptionDate\": \"2025-11-13T05:00:00.000Z\"\n  }\n]\n\n ```\n\n---\n\n#### 2️⃣ **Get Prescription History**\n\n- **Method:** `GET`\n    \n- **URL:** `/prescription/history/:patientId`\n    \n- **Purpose:** Fetch all past prescriptions of a patient.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `patientId` – ID of the patient\n        \n- **Response (200):**\n    \n\n```\n[\n  {\n    \"prescriptionId\": \"uuid-of-prescription\",\n    \"doctorId\": \"doctorId\",\n    \"diseaseDescription\": \"Seasonal Flu\",\n    \"dateOfPrescription\": \"2025-11-13T05:00:00.000Z\",\n    \"reportAssociated\": [\"reportId1\", \"reportId2\"],\n    \"medicines\": [\n      {\n        \"name\": \"Paracetamol\",\n        \"dosage\": \"500mg\",\n        \"timing\": \"Twice a day\",\n        \"durationInDays\": 5,\n        \"startDate\": \"2025-11-13T00:00:00.000Z\"\n      }\n    ]\n  }\n]\n\n ```\n\n---\n\n#### 3️⃣ **Get Prescription by ID**\n\n- **Method:** `GET`\n    \n- **URL:** `/prescription/:prescriptionId`\n    \n- **Purpose:** Fetch a specific prescription details by its ID.\n    \n- **Headers:**\n    \n    - `Authorization: Bearer`\n        \n- **Params:**\n    \n    - `prescriptionId` – ID of the prescription\n        \n- **Response (200):**\n    \n\n```\n{\n  \"prescriptionId\": \"uuid-of-prescription\",\n  \"doctorId\": \"doctorId\",\n  \"patientId\": \"patientId\",\n  \"diseaseDescription\": \"Seasonal Flu\",\n  \"dateOfPrescription\": \"2025-11-13T05:00:00.000Z\",\n  \"reportAssociated\": [\"reportId1\", \"reportId2\"],\n  \"medicines\": [\n    {\n      \"name\": \"Paracetamol\",\n      \"dosage\": \"500mg\",\n      \"timing\": \"Twice a day\",\n      \"durationInDays\": 5,\n      \"startDate\": \"2025-11-13T00:00:00.000Z\"\n    }\n  ]\n}\n\n ```\n\nEndFragment"
+		}
+	]
+}
