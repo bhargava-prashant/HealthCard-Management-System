@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: health-backend
+  template:
+    metadata:
+      labels:
+        app: health-backend
+    spec:
+      containers:
+      - name: backend
+        image: prashantbhargava365/health-backend:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: health-frontend
+  template:
+    metadata:
+      labels:
+        app: health-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: prashantbhargava365/health-frontend:latest
+        ports:
+        - containerPort: 3000
