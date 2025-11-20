@@ -10,7 +10,8 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-COPY ..
+# Copy the entire frontend source code into the container
+COPY . .           # <-- destination is current WORKDIR (/app)
 
 # Build the frontend
 RUN npm run build
@@ -22,4 +23,4 @@ RUN npm install -g serve
 EXPOSE 3000
 
 # Start the frontend server
-CMD ["serve", "-s", "build"]
+CMD ["serve", "-s", "dist"]   # <-- vite default build output is /dist
