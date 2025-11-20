@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git branch: 'main', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
+                git branch: 'master', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
             }
         }
         stage('Build Backend') {
