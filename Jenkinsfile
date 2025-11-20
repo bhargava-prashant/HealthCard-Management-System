@@ -10,6 +10,7 @@ pipeline {
             steps {
                 deleteDir()
             }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'main', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
