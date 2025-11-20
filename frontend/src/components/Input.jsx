@@ -23,3 +23,4 @@ const Input = ({ label, type = 'text', name, value, onChange, error, placeholder
 
 export default Input;
 
+

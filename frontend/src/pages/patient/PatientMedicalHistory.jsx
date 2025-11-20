@@ -183,3 +183,4 @@ const PatientMedicalHistory = () => {
 
 export default PatientMedicalHistory;
 
+

@@ -1,60 +1,48 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-        BACKEND_IMAGE = 'health-backend'
-        FRONTEND_IMAGE = 'health-frontend'
+        DOCKERHUB_CRED = credentials('dockerhub')
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
     }
-
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/bhargava-prashant/HealthCard-Management-System.git'
+                git branch: 'main', url: 'https://github.com/yourusername/health-booking-system.git'
             }
         }
-
         stage('Build Backend') {
             steps {
-                echo 'Building backend Docker image...'
-                sh 'docker build -t ${BACKEND_IMAGE} ./backend'
+                script {
+                    docker.build("yourusername/health-backend", "./backend")
+                }
             }
         }
-
         stage('Build Frontend') {
             steps {
-                echo 'Building frontend Docker image...'
-                sh 'docker build -t ${FRONTEND_IMAGE} ./frontend'
+                script {
+                    docker.build("yourusername/health-frontend", "./frontend")
+                }
             }
         }
-
-        stage('Run Docker Compose') {
+        stage('Push Images') {
             steps {
-                echo 'Starting full stack with Docker Compose...'
-                sh 'docker compose -f ${DOCKER_COMPOSE_FILE} up -d'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        docker.image('yourusername/health-backend').push('latest')
+                        docker.image('yourusername/health-frontend').push('latest')
+                    }
+                }
             }
         }
-
-        stage('Test') {
+        stage('Deploy to Kubernetes') {
             steps {
-                echo 'Running tests (you can add your npm or pytest commands here)'
-                // Example: sh 'docker exec backend npm test'
+                sh '''
+                    # Use kubectl to deploy to AWS EKS
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
             }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying application...'
-                // Later we’ll connect this to Terraform or Kubernetes
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up containers...'
-            sh 'docker compose down'
         }
     }
 }

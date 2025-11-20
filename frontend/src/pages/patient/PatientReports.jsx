@@ -170,3 +170,4 @@ const PatientReports = () => {
 
 export default PatientReports;
 
+

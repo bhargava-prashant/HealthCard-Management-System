@@ -292,3 +292,4 @@ const AdminPatients = () => {
 
 export default AdminPatients;
 
+
