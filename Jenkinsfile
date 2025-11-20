@@ -13,6 +13,7 @@ pipeline {
         }
         stage('Checkout') {
             steps {
+                // Checkout the repository
                 git branch: 'master', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
             }
         }
@@ -26,7 +27,8 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 script {
-                    docker.build("prashantbhargava365/health-frontend", "./frontend")
+                    // Wrap path in quotes to handle spaces in Jenkins workspace
+                    docker.build("prashantbhargava365/health-frontend", "\"./frontend\"")
                 }
             }
         }
@@ -43,7 +45,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                    # Use kubectl to deploy to AWS EKS
+                    # Deploy using kubectl
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
                 '''
