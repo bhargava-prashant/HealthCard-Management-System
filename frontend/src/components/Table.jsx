@@ -35,3 +35,4 @@ const Table = ({ headers, data, renderRow, emptyMessage = 'No data available' })
 
 export default Table;
 
+

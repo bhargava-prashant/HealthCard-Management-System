@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -122,5 +121,6 @@ const Login = () => {
 };
 
 export default Login;
+
 
 
