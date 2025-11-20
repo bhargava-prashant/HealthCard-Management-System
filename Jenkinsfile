@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: "https://github.com/bhargava-prashant/Health-booking.git"
+                git branch: 'main', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
             }
         }
         stage('Build Backend') {
