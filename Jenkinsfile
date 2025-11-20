@@ -8,20 +8,20 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/health-booking-system.git'
+                git branch: 'main', url: "https://github.com/bhargava-prashant/Health-booking.git"
             }
         }
         stage('Build Backend') {
             steps {
                 script {
-                    docker.build("yourusername/health-backend", "./backend")
+                    docker.build("prashantbhargava365/health-backend", "./backend")
                 }
             }
         }
         stage('Build Frontend') {
             steps {
                 script {
-                    docker.build("yourusername/health-frontend", "./frontend")
+                    docker.build("prashantbhargava365/health-frontend", "./frontend")
                 }
             }
         }
@@ -29,8 +29,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                        docker.image('yourusername/health-backend').push('latest')
-                        docker.image('yourusername/health-frontend').push('latest')
+                        docker.image('prashantbhargava365/health-backend').push('latest')
+                        docker.image('prashantbhargava365/health-frontend').push('latest')
                     }
                 }
             }
