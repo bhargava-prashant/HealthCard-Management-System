@@ -6,6 +6,10 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
     }
     stages {
+        stage('Cleanup') {
+            steps {
+                deleteDir()
+            }
         stage('Checkout') {
             steps {
                 git branch: 'main', url: "https://github.com/bhargava-prashant/HealthCard-Management-System.git"
