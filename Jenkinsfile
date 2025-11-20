@@ -44,11 +44,15 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
     steps {
-        sh '''
-        kubectl apply --validate=false -f k8s/deployment.yml
-        kubectl apply --validate=false -f k8s/service.yml
-        '''
+        withCredentials([file(credentialsId: 'eks-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+            sh '''
+            export KUBECONFIG=$KUBECONFIG_FILE
+            kubectl apply -f k8s/deployment.yml
+            kubectl apply -f k8s/service.yml
+            '''
+        }
     }
 }
+
     }
 }
